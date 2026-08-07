@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>عافية للمواعيد الطبية | AfiaCare</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              900: '#134e4a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <link rel="icon" type="image/jpg" href="assets/icon.jpg">
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col antialiased">
+
+  <!-- ==================== SHASHAT AL-TARKHEEB (SPLASH SCREEN) ==================== -->
+  <div id="splash-screen" class="relative">
+    <div class="bg-islamic-pattern"></div>
+    
+    <div class="splash-content animate-fade-in">
+      <div class="w-24 h-24 mx-auto mb-4 rounded-3xl full-bleed-icon-frame shadow-2xl ring-4 ring-amber-400/40">
+        <img src="assets/icon.jpg" alt="AfiaCare Icon" class="w-full h-full object-cover">
+      </div>
+
+      <h1 class="text-3xl md:text-4xl font-black tracking-tight text-white mb-2 font-cairo">
+        عافية للمواعيد الطبية <span class="text-amber-400 font-light text-2xl">| AfiaCare</span>
+      </h1>
+      <p class="text-emerald-200 text-sm md:text-base font-medium mb-6">نظام الرعاية الصحية والحجوزات الطبية الذكي</p>
+
+      <!-- Prayer Card -->
+      <div class="prayer-card mb-8">
+        <div class="flex justify-center mb-3">
+          <span class="px-4 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold font-amiri">
+            ✨ دعاء الشفاء والعافية ✨
+          </span>
+        </div>
+        <p class="prayer-text">
+          "اللهم بحق محمد وال محمد شافي مرضانا وارزقهم عافية تدوم انك سميع مجيب الدعاء"
+        </p>
+        <p class="text-xs text-amber-200/80 font-amiri">نسأل الله أن يلبس جميع المرضى ثوب الصحة والعافية</p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <button id="btn-enter-app" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold text-base shadow-xl shadow-amber-500/30 transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-3">
+          <span>الدخول للتطبيق والمواعيد</span>
+          <i class="fas fa-arrow-left"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== HEADER & NAVBAR ==================== -->
+  <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="window.afiaApp.switchView('patient')">
+        <div class="w-12 h-12 rounded-2xl full-bleed-icon-frame shadow-md ring-2 ring-teal-500">
+          <img src="assets/icon.jpg" alt="AfiaCare Logo" class="w-full h-full object-cover">
+        </div>
+        <div>
+          <h2 class="text-xl font-black text-slate-900 dark:text-white leading-none">عافية <span class="text-teal-600 dark:text-teal-400">Care</span></h2>
+          <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">للمواعيد والرعاية الطبية</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="hidden md:flex items-center gap-2 bg-slate-100 dark:bg-slate-800/60 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-700/60">
+        <button data-view="patient" class="nav-tab px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 bg-teal-600 text-white shadow-md shadow-teal-600/30 flex items-center gap-2">
+          <i class="fas fa-user-injured"></i>
+          <span>واجهة المريض</span>
+        </button>
+
+        <button data-view="doctor" class="nav-tab px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-2">
+          <i class="fas fa-user-md"></i>
+          <span>واجهة العيادة والطبيب</span>
+        </button>
+
+        <button data-view="icon" class="nav-tab px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-2">
+          <i class="fas fa-icons"></i>
+          <span>أيقونة التطبيق</span>
+        </button>
+      </nav>
+
+      <!-- Action Utilities -->
+      <div class="flex items-center gap-3">
+        <!-- Replay Prayer Splash -->
+        <button class="btn-replay-prayer p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-900 text-xs font-bold flex items-center gap-2 hover:bg-amber-100 transition" title="عرض دعاء الشفاء">
+          <i class="fas fa-hands-praying text-sm"></i>
+          <span class="hidden sm:inline">دعاء الشفاء</span>
+        </button>
+
+        <!-- Dark/Light Theme Switcher -->
+        <button id="btn-theme-toggle" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="تبديل النمط">
+          <i class="fas fa-moon dark:hidden"></i>
+          <i class="fas fa-sun hidden dark:block text-amber-400"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Nav Bar bottom -->
+    <div class="md:hidden flex items-center justify-around bg-slate-100 dark:bg-slate-900 p-2 border-t border-slate-200 dark:border-slate-800 text-xs">
+      <button data-view="patient" class="nav-tab px-3 py-2 rounded-lg font-bold flex items-center gap-1.5 bg-teal-600 text-white">
+        <i class="fas fa-user-injured"></i>
+        <span>المريض</span>
+      </button>
+      <button data-view="doctor" class="nav-tab px-3 py-2 rounded-lg font-bold flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+        <i class="fas fa-user-md"></i>
+        <span>العيادة</span>
+      </button>
+      <button data-view="icon" class="nav-tab px-3 py-2 rounded-lg font-bold flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
+        <i class="fas fa-icons"></i>
+        <span>الأيقونة</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ==================== VIEW 1: PATIENT INTERFACE ==================== -->
+    <section id="view-patient" class="app-view space-y-8">
+      
+      <!-- Hero Banner Card -->
+      <div class="relative overflow-hidden rounded-3xl glass-panel p-8 md:p-10 border border-teal-500/20 shadow-xl bg-gradient-to-r from-teal-900/90 to-emerald-900/90 text-white">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center relative z-10">
+          <div>
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-bold mb-4 border border-amber-400/30">
+              <i class="fas fa-check-circle"></i>
+              حجوزات فورية بدون تضارب
+            </span>
+            <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-3">
+              اختر طبيبك الأفضل واحجز موعدك الطبي بكل سهولة
+            </h1>
+            <p class="text-teal-100 text-sm leading-relaxed mb-6">
+              تطبيق عافية يوفر لك الوصول إلى نخبة الأطباء والاستشاريين مع ضمان المواعيد الحقيقية ومنع التضارب نهائياً.
+            </p>
+            
+            <div class="flex flex-wrap gap-3 text-xs text-amber-200">
+              <span class="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
+                <i class="fas fa-shield-halved text-amber-400"></i> حجز أمان ومؤكد
+              </span>
+              <span class="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10">
+                <i class="fas fa-clock text-amber-400"></i> تنظيم وقت الدخول
+              </span>
+            </div>
+          </div>
+
+          <div class="relative hidden md:block">
+            <img src="assets/banner.jpg" alt="Medical Care Banner" class="rounded-2xl shadow-2xl border-4 border-white/10 object-cover h-64 w-full">
+          </div>
+        </div>
+      </div>
+
+      <!-- Search & Filter Controls -->
+      <div class="space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white">دليل الأطباء والاستشاريين</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">تصفح الأطباء المتاحين حسب التخصص واطلع على التفاصيل</p>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="relative w-full md:w-80">
+            <i class="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input 
+              type="text" 
+              id="patient-search"
+              placeholder="ابحث باسم الطبيب، التخصص، أو العيادة..."
+              class="w-full pr-11 pl-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm"
+            >
+          </div>
+        </div>
+
+        <!-- Specialty Filter Buttons -->
+        <div id="specialty-filters" class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Doctor Cards Grid -->
+      <div id="doctors-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- My Bookings Section -->
+      <div class="pt-8 border-t border-slate-200 dark:border-slate-800 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <i class="fas fa-calendar-check text-teal-600"></i>
+              <span>سجل حجوزاتي الطبية</span>
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">متابعة المواعيد القادمة وتذاكر الحجز والزيارات المكتملة</p>
+          </div>
+
+          <!-- Filter Tabs for Bookings -->
+          <div class="flex items-center gap-2 bg-slate-200 dark:bg-slate-800 p-1 rounded-xl">
+            <button id="tab-upcoming" class="px-4 py-2 rounded-lg text-xs font-bold bg-teal-600 text-white transition">
+              المواعيد القادمة
+            </button>
+            <button id="tab-past" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition">
+              المواعيـد السابقة والملغاة
+            </button>
+          </div>
+        </div>
+
+        <!-- Bookings List Container -->
+        <div id="my-bookings-list" class="space-y-4">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 2: DOCTOR / CLINIC DASHBOARD ==================== -->
+    <section id="view-doctor" class="app-view hidden space-y-8">
+      
+      <!-- LOGIN SCREEN (Displayed if not signed in) -->
+      <div id="auth-guard-container" class="glass-panel p-8 md:p-12 rounded-3xl text-center max-w-xl mx-auto border border-teal-500/30 shadow-2xl space-y-6">
+        <div class="w-20 h-20 mx-auto rounded-3xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 flex items-center justify-center text-3xl shadow-inner border border-teal-200 dark:border-teal-800">
+          <i class="fas fa-user-shield"></i>
+        </div>
+
+        <div>
+          <span class="px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950/50 text-teal-800 dark:text-teal-300 text-xs font-bold border border-teal-300 dark:border-teal-800">
+            🔒 تسجيل الدخول الآمن للطبيب والعيادة
+          </span>
+          <h2 class="text-2xl font-black text-slate-900 dark:text-white mt-3">الدخول للوحة العيادة وإدارة المرضى</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+            يُرجى تسجيل الدخول بحسابك المعتمد للوصول إلى جدول مواعيد المرضى وإدارة الحجوزات بأمان.
+          </p>
+        </div>
+
+        <button id="btn-google-signin" class="w-full py-4 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-extrabold text-base shadow-xl shadow-teal-600/30 flex items-center justify-center gap-3 transform hover:scale-[1.02] transition-all">
+          <i class="fab fa-google text-xl text-amber-300"></i>
+          <span>تسجيل الدخول بواسطة Google</span>
+        </button>
+      </div>
+
+      <!-- DOCTOR DASHBOARD CONTENT (Displayed after authentication verification) -->
+      <div id="doctor-content-container" class="hidden space-y-8">
+        
+        <!-- Authenticated Doctor Header Banner -->
+        <div class="glass-panel p-6 rounded-3xl border border-teal-500/30 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6 bg-gradient-to-r from-teal-950/20 to-slate-900/40">
+          <div class="flex items-center gap-4">
+            <div class="relative group">
+              <img id="doctor-auth-avatar" src="assets/icon.jpg" alt="Doctor Profile" class="w-24 h-24 rounded-2xl object-cover ring-4 ring-teal-500 shadow-xl">
+              <label for="doctor-avatar-file-input" class="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center cursor-pointer shadow-xl transition" title="اختيار صورة جديدة من جهازك">
+                <i class="fas fa-camera text-sm"></i>
+              </label>
+            </div>
+
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 id="doctor-auth-name" class="text-xl font-extrabold text-slate-900 dark:text-white">د. المعالج الطبي</h2>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-500/30">
+                  <i class="fas fa-check-circle ml-1"></i>حساب موثق
+                </span>
+              </div>
+              <p id="doctor-auth-email" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-mono"></p>
+              
+              <!-- PROMINENT VISIBLE FIREBASE STORAGE FILE INPUT & UPLOAD BUTTON -->
+              <div class="mt-3 flex flex-wrap items-center gap-3 bg-teal-50/50 dark:bg-teal-950/40 p-2.5 rounded-2xl border border-teal-200 dark:border-teal-800">
+                <input type="file" id="doctor-avatar-file-input" accept="image/*" class="text-xs text-slate-600 dark:text-slate-300 file:mr-3 file:py-1.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-teal-600 file:text-white hover:file:bg-teal-700 cursor-pointer">
+                <button id="btn-trigger-upload" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 flex items-center gap-1.5 transition">
+                  <i class="fas fa-cloud-arrow-up"></i>
+                  <span>رفع وتحديث الصورة (Firebase Storage)</span>
+                </button>
+                <span id="upload-status-indicator" class="text-[11px] font-bold text-teal-600 dark:text-teal-400 hidden">
+                  <i class="fas fa-spinner fa-spin ml-1"></i>جاري التخزين الفعلي...
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <button id="btn-toggle-doctor-settings" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-2 transition">
+              <i class="fas fa-sliders-h"></i>
+              <span>إدارة المسؤولين والإعدادات</span>
+            </button>
+
+            <button id="btn-doctor-logout" class="px-4 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 text-xs font-bold flex items-center gap-2 transition">
+              <i class="fas fa-right-from-bracket"></i>
+              <span>تسجيل الخروج</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PENDING INVITATION BANNER (For Logged-in Staff needing invitation acceptance) -->
+        <div id="pending-invitation-banner" class="hidden glass-panel p-5 rounded-3xl border border-amber-500/40 bg-amber-500/10 space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-lg">
+              <i class="fas fa-envelope-open-text"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-extrabold text-amber-900 dark:text-amber-200">لديك طلب دعوة مسؤول جديد بانتظار قبولك!</h4>
+              <p id="pending-invitation-desc" class="text-xs text-amber-800 dark:text-amber-300 mt-0.5"></p>
+            </div>
+          </div>
+          <button id="btn-accept-pending-invite" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/30 flex items-center gap-2">
+            <i class="fas fa-check-circle"></i>
+            <span>قبول الدعوة وتفعيل صلاحية إدارة الحجوزات</span>
+          </button>
+        </div>
+
+        <!-- DOCTOR SETTINGS & ADMIN INVITATION SYSTEM SECTION -->
+        <div id="doctor-settings-panel" class="hidden glass-panel p-6 rounded-3xl border border-teal-500/20 shadow-lg space-y-6">
+          <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
+            <h3 class="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <i class="fas fa-users-gear text-teal-600"></i>
+              <span>نظام إدارة المسؤولين (Staff Permissions & Invitations)</span>
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              إضافة الموظفين ومسؤولي الاستقبال بالعيادة. لن يُمنح الموظف الصلاحية إلا بعد تسجيل دخوله بحسابه وقبوله للدعوة.
+            </p>
+          </div>
+
+          <!-- Invitation Dispatch Form -->
+          <form id="form-send-invitation" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <div class="md:col-span-1">
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">بريد الموظف/المسؤول الإلكتروني *</label>
+              <input type="email" id="input-invite-email" required placeholder="employee@gmail.com" class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
+            </div>
+
+            <div class="md:col-span-1">
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">المسمى الوظيفي والصلاحيات</label>
+              <select id="select-invite-role" class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-bold">
+                <option value="مساعد عيادة - حجز وتنظيم المواعيد">مساعد عيادة - حجز وتنظيم المواعيد</option>
+                <option value="مسؤول استقبال - تسجيل المرضى">مسؤول استقبال - تسجيل المرضى</option>
+                <option value="مساعد طبيب - متابعة الحجوزات والطوارئ">مساعد طبيب - متابعة الحجوزات والطوارئ</option>
+              </select>
+            </div>
+
+            <div class="md:col-span-1">
+              <button type="submit" class="w-full py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md shadow-teal-600/20 flex items-center justify-center gap-2">
+                <i class="fas fa-paper-plane"></i>
+                <span>إرسال طلب دعوة مسؤول</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Active & Pending Invitations Table -->
+          <div>
+            <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3">سجل طلبات الدعوة والصلاحيات الممنوحة:</h4>
+            <div id="invitations-list-container" class="space-y-2">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Clinic Control Bar -->
+        <div class="glass-panel p-6 rounded-3xl border border-teal-500/20 shadow-lg space-y-6">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-900/50 text-teal-600 flex items-center justify-center text-lg">
+                  <i class="fas fa-clinic-medical"></i>
+                </span>
+                <span>جدول المواعيد والبيانات الحقيقية (Firestore DB)</span>
+              </h1>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">بيانات حقيقية مربوطة بقاعدة بيانات Firestore الخاصة بحساب الطبيب</p>
+            </div>
+
+            <!-- Date Switcher Only (Doctor selector removed as clinic view binds automatically to logged-in doctor UID) -->
+            <div class="w-full sm:w-auto">
+              <label class="block text-[11px] font-bold text-slate-500 mb-1">تاريخ الجدول:</label>
+              <input type="date" id="doctor-schedule-date" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-sm text-slate-800 dark:text-slate-200">
+            </div>
+          </div>
+
+          <!-- Daily Statistics Counters -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+            <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">إجمالي حجز اليوم</span>
+              <span id="stat-today-total" class="text-2xl font-black text-teal-600 dark:text-teal-400 mt-1 block">0</span>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">حالات جارية/مؤكدة</span>
+              <span id="stat-today-pending" class="text-2xl font-black text-amber-500 mt-1 block">0</span>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">معاينات مكتملة</span>
+              <span id="stat-today-completed" class="text-2xl font-black text-emerald-500 mt-1 block">0</span>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <span class="text-xs text-slate-500 dark:text-slate-400 block font-medium">نسبة الإشغال</span>
+              <span id="stat-today-occupancy" class="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1 block">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- FIRESTORE REALTIME BOOKINGS DATA TABLE -->
+        <div class="glass-panel p-6 rounded-3xl border border-teal-500/30 shadow-xl space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="fas fa-database text-teal-600"></i>
+                <span>سجل وقاعدة بيانات الحجوزات (Firebase Firestore)</span>
+              </h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                جدول حجوزات المرضى المباشر. يمكنك تعديل الملاحظات وحالة الحجز، والضغط على رقم الهاتف للتواصل عبر واتساب مباشرة.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 text-xs font-bold border border-teal-300 dark:border-teal-800 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <span>Firestore Live Sync</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Bookings Table Container -->
+          <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-extrabold border-b border-slate-200 dark:border-slate-800">
+                <tr>
+                  <th class="p-4">اسم المريض الثلاثي</th>
+                  <th class="p-4">رقم الهاتف (واتساب مباشر)</th>
+                  <th class="p-4">تاريخ ووقت الموعد</th>
+                  <th class="p-4">حالة الحجز</th>
+                  <th class="p-4">ملاحظات الطبيب (Firestore)</th>
+                  <th class="p-4 text-center">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="firestore-bookings-tbody" class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-950/40">
+                <!-- Populated dynamically from Firestore by doctor.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Doctor Schedule Timeline -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <i class="fas fa-calendar-day text-teal-600"></i>
+              <span>الجدول الزمني ومحرك منع التضارب</span>
+            </h2>
+            <span class="text-xs text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-900">
+              <i class="fas fa-check-double ml-1"></i> البيانات مسحوبة من Firestore مباشرة
+            </span>
+          </div>
+
+          <div id="doctor-schedule-container" class="space-y-3">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: FULL BLEED APP ICON SHOWCASE ==================== -->
+    <section id="view-icon" class="app-view hidden space-y-8">
+      <div class="glass-panel p-8 md:p-12 rounded-3xl text-center max-w-3xl mx-auto border border-teal-500/30 shadow-2xl">
+        <span class="px-4 py-1.5 rounded-full bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-xs font-bold mb-4 inline-block">
+          💎 أيقونة التطبيق المتكاملة (Full Bleed Icon Design)
+        </span>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-white mb-3">
+          تصميم أيقونة تطبيق عافية بدون حواف بيضاء
+        </h1>
+        <p class="text-sm text-slate-600 dark:text-slate-300 max-w-xl mx-auto mb-8">
+          أيقونة صحية متكاملة تملأ مساحة الشاشة بالكامل edge-to-edge بألوان تركوازية وزبرجدية متدرجة مع الهلال الطبي وشعار نبض القلب واللمعان الذهبي.
+        </p>
+
+        <!-- Full Bleed Icon Mockup Showcase -->
+        <div class="w-64 h-64 md:w-80 md:h-80 mx-auto rounded-none shadow-2xl overflow-hidden ring-8 ring-teal-500/20 mb-8 transform hover:scale-105 transition duration-300">
+          <img src="assets/icon.jpg" alt="AfiaCare Full Bleed App Icon" class="w-full h-full object-cover">
+        </div>
+
+        <!-- Details & Download -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <button id="btn-download-icon" class="px-8 py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-sm shadow-lg shadow-teal-600/30 flex items-center gap-2">
+            <i class="fas fa-download"></i>
+            <span>تنزيل أيقونة التطبيق بدقة عالية</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODAL 1: BOOKING MODAL ==================== -->
+  <div id="booking-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-xl rounded-3xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto relative animate-slide-up border border-teal-500/30">
+      
+      <!-- Close Button -->
+      <button id="btn-close-booking-modal" class="absolute top-5 left-5 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-rose-500 flex items-center justify-center transition">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <!-- Modal Doctor Header -->
+      <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+        <img id="modal-doctor-avatar" src="" alt="" class="w-16 h-16 rounded-2xl object-cover border-2 border-teal-500">
+        <div>
+          <span id="modal-doctor-spec" class="text-xs font-bold text-teal-600 dark:text-teal-400"></span>
+          <h3 id="modal-doctor-name" class="text-xl font-black text-slate-900 dark:text-white"></h3>
+          <p class="text-xs text-slate-500 mt-0.5">رسوم الكشفية: <span id="modal-doctor-fee" class="font-bold text-emerald-600"></span></p>
+        </div>
+      </div>
+
+      <!-- Conflict Warning Alert (Shown if conflict detected) -->
+      <div id="conflict-alert" class="hidden mb-6 p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 flex items-start gap-3">
+        <i class="fas fa-exclamation-triangle text-rose-600 text-lg mt-0.5"></i>
+        <div>
+          <h4 class="text-sm font-bold text-rose-800 dark:text-rose-300">تنبيه منع تضارب المواعيد</h4>
+          <p id="conflict-alert-msg" class="text-xs text-rose-700 dark:text-rose-400 mt-1 leading-relaxed"></p>
+        </div>
+      </div>
+
+      <!-- Booking Form -->
+      <form id="booking-form" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">1. اختر تاريخ الموعد:</label>
+          <input type="date" id="booking-date" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-bold text-sm">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">2. اختر الوقت المتاح (الأخضر متاح / الأحمر محجوز):</label>
+          <div id="time-slots-container" class="grid grid-cols-4 gap-2 mt-2">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">اسم المريض الثلاثي *</label>
+            <input type="text" id="patient-name" required placeholder="مثال: أحمد محمد جاسم" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">رقم الهاتف للتواصل *</label>
+            <input type="tel" id="patient-phone" required placeholder="0770xxxxxxx" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">عمر المريض</label>
+            <input type="number" id="patient-age" placeholder="مثال: 35" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">نوع الزيارة</label>
+            <select id="visit-type" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-bold">
+              <option value="الكشف الأولي">الكشف الأولي</option>
+              <option value="استشارة وصحة">استشارة وصحة</option>
+              <option value="متابعة وفحوصات">متابعة وفحوصات</option>
+              <option value="طوارئ عاجلة">طوارئ عاجلة</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">ملاحظات أو أعراض مرصودة</label>
+          <textarea id="booking-notes" rows="2" placeholder="اكتب أي ملاحظة يرغب الطبيب بصفها..." class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm"></textarea>
+        </div>
+
+        <button type="submit" class="w-full py-3.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-base shadow-lg shadow-teal-600/30 flex items-center justify-center gap-2 mt-4">
+          <i class="fas fa-check-circle"></i>
+          <span>تأكيد الحجز النهائي</span>
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: PRINTABLE TICKET MODAL ==================== -->
+  <div id="ticket-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-md rounded-3xl p-6 relative animate-slide-up bg-white text-slate-900">
+      
+      <button id="btn-close-ticket-modal" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <div id="printable-ticket" class="text-center p-4 space-y-4">
+        <div class="w-12 h-12 mx-auto rounded-xl overflow-hidden">
+          <img src="assets/icon.jpg" alt="AfiaCare" class="w-full h-full object-cover">
+        </div>
+        <div>
+          <h3 class="font-extrabold text-xl">تذكرة حجز موعد - عافية</h3>
+          <span class="text-xs font-mono font-bold text-teal-600">رقم الحجز: #<span id="ticket-id"></span></span>
+        </div>
+
+        <div class="border-t border-b border-dashed border-slate-300 py-3 space-y-2 text-right text-xs">
+          <div class="flex justify-between">
+            <span class="text-slate-500">الطبيب:</span>
+            <span id="ticket-doctor" class="font-bold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">المريض:</span>
+            <span id="ticket-patient" class="font-bold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">تاريخ الموعد:</span>
+            <span id="ticket-date" class="font-bold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">الوقت المحدد:</span>
+            <span id="ticket-time" class="font-bold text-teal-700"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">نوع الزيارة:</span>
+            <span id="ticket-type" class="font-bold"></span>
+          </div>
+        </div>
+
+        <!-- Simulated QR Code -->
+        <div class="w-24 h-24 mx-auto bg-slate-100 p-2 rounded-xl flex items-center justify-center border border-slate-300">
+          <i class="fas fa-qrcode text-5xl text-slate-800"></i>
+        </div>
+
+        <p class="text-[11px] text-slate-500">يرجى الحضور قبل الموعد بـ 15 دقيقة وإبراز التذكرة عند موظف الاستقبال.</p>
+
+        <button id="btn-do-print" class="w-full py-2.5 rounded-xl bg-teal-600 text-white font-bold text-xs flex items-center justify-center gap-2">
+          <i class="fas fa-print"></i>
+          <span>طباعة تذكرة الحجز</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Audio prayer background (Silent or low volume calligraphic feel) -->
+  <audio id="audio-prayer" preload="none"></audio>
+
+  <!-- Load ES Modules JS -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

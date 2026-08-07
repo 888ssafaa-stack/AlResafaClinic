@@ -1,0 +1,50 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+
+# Build intermediates (exclude everything inside build/ except build/web)
+build/
+!build/web/
+!build/web/**
+
+# APK release
+!/*.apk
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio & Build intermediates
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Tools
+gh*.exe
+gh_tool2.zip
+gh_ext2/
