@@ -228,44 +228,55 @@ export class FirestoreInvitations {
   }
 
   /**
-   * Strict Authorization Check: Check if user email is Doctor or Accepted Staff
+   * Authorization Check
+   * Order: 1) Primary Owner → 2) Firestore Doctor → 3) Accepted Staff → 4) Deny
    */
   static async checkUserAuthorization(email) {
-    const cleanEmail = email.toLowerCase().trim();
+    const cleanEmail = String(email).toLowerCase().trim();
 
-    // PRIMARY OWNER — always granted full doctor access regardless of Firestore
-    const PRIMARY_OWNER_EMAIL = '888ssafaa@gmail.com';
-    if (cleanEmail === PRIMARY_OWNER_EMAIL) {
-      const uid = auth.currentUser?.uid || 'primary-doctor';
-      return { isAuthorized: true, isDoctor: true, doctorId: uid };
+    // ═══════════════════════════════════════════════════
+    // STEP 0: PRIMARY CLINIC OWNER — IMMEDIATE ACCESS
+    // This check runs FIRST and exits the function immediately.
+    // No Firestore call, no async delay, no interference.
+    // ═══════════════════════════════════════════════════
+    if (cleanEmail === '888ssafaa@gmail.com') {
+      return {
+        isAuthorized: true,
+        isDoctor: true,
+        doctorId: auth.currentUser?.uid ?? 'primary-doctor'
+      };
     }
 
+    // ═══════════════════════════════════════════════════
+    // STEP 1 & 2: Firestore checks for other users only
+    // ═══════════════════════════════════════════════════
     try {
-      // Step 1: Check if user is a registered doctor in Firestore
-      const docQuery = query(collection(db, "doctors"), where("email", "==", cleanEmail));
-      const docSnap = await getDocs(docQuery);
+      // Check registered doctors collection
+      const docSnap = await getDocs(
+        query(collection(db, 'doctors'), where('email', '==', cleanEmail))
+      );
       if (!docSnap.empty) {
         return { isAuthorized: true, isDoctor: true, doctorId: docSnap.docs[0].id };
       }
 
-      // Step 2: Check if user is an accepted assistant in clinic_invitations
-      const invQuery = query(
-        collection(db, "clinic_invitations"),
-        where("assistantEmail", "==", cleanEmail),
-        where("status", "==", "accepted")
+      // Check accepted staff invitations
+      const invSnap = await getDocs(
+        query(
+          collection(db, 'clinic_invitations'),
+          where('assistantEmail', '==', cleanEmail),
+          where('status', '==', 'accepted')
+        )
       );
-      const invSnap = await getDocs(invQuery);
       if (!invSnap.empty) {
-        const invData = invSnap.docs[0].data();
-        return { isAuthorized: true, isDoctor: false, doctorId: invData.doctorId, role: invData.role };
+        const inv = invSnap.docs[0].data();
+        return { isAuthorized: true, isDoctor: false, doctorId: inv.doctorId, role: inv.role };
       }
 
-      // Step 3: STRICT — not the owner, not a doctor, not accepted staff → deny access
+      // Not owner, not doctor, not accepted staff → deny
       return { isAuthorized: false, isDoctor: false, doctorId: null };
 
     } catch (e) {
-      // On Firestore error, deny access rather than granting it
-      console.warn("Authorization check error:", e);
+      console.warn('Authorization check error:', e);
       return { isAuthorized: false, isDoctor: false, doctorId: null };
     }
   }
