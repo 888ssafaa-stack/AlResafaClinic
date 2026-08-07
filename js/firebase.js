@@ -28,14 +28,15 @@ import {
   getDownloadURL 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-// Firebase Production Config
+// Firebase Production Config - Al-Resafa Clinic
 const firebaseConfig = {
-  apiKey: "AIzaSyAfiaCareProdKeyPlaceholder8882026",
-  authDomain: "afiacare-clinic.firebaseapp.com",
-  projectId: "afiacare-clinic",
-  storageBucket: "afiacare-clinic.appspot.com",
-  messagingSenderId: "987654321012",
-  appId: "1:987654321012:web:afiacareclinic2026"
+  apiKey: "AIzaSyAKb67NYLwKOcIF7BnkYegsQtDy5gyaHVM",
+  authDomain: "al-resafa-clinic.firebaseapp.com",
+  projectId: "al-resafa-clinic",
+  storageBucket: "al-resafa-clinic.firebasestorage.app",
+  messagingSenderId: "738799541155",
+  appId: "1:738799541155:web:4c93f682544954c75e5816",
+  measurementId: "G-CFS1MRQYFW"
 };
 
 // Initialize Firebase App Instance
