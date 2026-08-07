@@ -234,14 +234,14 @@ export class FirestoreInvitations {
     const cleanEmail = email.toLowerCase().trim();
     
     try {
-      // Check if user is registered doctor
+      // Step 1: Check if user is a registered doctor
       const docQuery = query(collection(db, "doctors"), where("email", "==", cleanEmail));
       const docSnap = await getDocs(docQuery);
       if (!docSnap.empty) {
         return { isAuthorized: true, isDoctor: true, doctorId: docSnap.docs[0].id };
       }
 
-      // Check if user is accepted assistant in clinic_invitations
+      // Step 2: Check if user is an accepted assistant in clinic_invitations
       const invQuery = query(
         collection(db, "clinic_invitations"),
         where("assistantEmail", "==", cleanEmail),
@@ -253,9 +253,13 @@ export class FirestoreInvitations {
         return { isAuthorized: true, isDoctor: false, doctorId: invData.doctorId, role: invData.role };
       }
 
-      return { isAuthorized: true, isDoctor: true, doctorId: 'doc-1' }; // Primary doctor access
+      // Step 3: STRICT — not a doctor, not accepted staff → deny access
+      return { isAuthorized: false, isDoctor: false, doctorId: null };
+
     } catch (e) {
-      return { isAuthorized: true, isDoctor: true, doctorId: 'doc-1' };
+      // On Firestore error, deny access rather than granting it
+      console.warn("Authorization check error:", e);
+      return { isAuthorized: false, isDoctor: false, doctorId: null };
     }
   }
 }

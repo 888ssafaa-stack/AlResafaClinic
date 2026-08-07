@@ -185,24 +185,32 @@ export class DoctorManager {
         return;
       }
 
-      const statusIndicator = document.getElementById('upload-status-indicator');
-      if (statusIndicator) {
-        statusIndicator.classList.remove('hidden');
+      // Disable button and show status to prevent stuck state
+      if (btnUpload) {
+        btnUpload.disabled = true;
+        btnUpload.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>جاري الرفع...</span>';
       }
+      const statusIndicator = document.getElementById('upload-status-indicator');
+      if (statusIndicator) statusIndicator.classList.remove('hidden');
 
       try {
-        const downloadUrl = await uploadProfileImageToStorage(this.selectedDoctorId, file);
-        
-        if (statusIndicator) {
-          statusIndicator.classList.add('hidden');
+        // Always use the currently authenticated Firebase UID
+        const uid = this.authenticatedUser?.uid || this.selectedDoctorId;
+        const downloadUrl = await uploadProfileImageToStorage(uid, file);
+
+        if (statusIndicator) statusIndicator.classList.add('hidden');
+        if (btnUpload) {
+          btnUpload.disabled = false;
+          btnUpload.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> <span>رفع وتحديث الصورة</span>';
         }
 
-        // Update current authenticated user photo URL
+        // Update avatar in memory and localStorage
         if (this.authenticatedUser) {
           this.authenticatedUser.photoURL = downloadUrl;
           localStorage.setItem('afiacare_auth_user', JSON.stringify(this.authenticatedUser));
         }
 
+        // Sync to local doctor record
         const currentDoc = this.doctors.find(d => d.id === this.selectedDoctorId);
         if (currentDoc) {
           currentDoc.avatar = downloadUrl;
@@ -210,10 +218,14 @@ export class DoctorManager {
         }
 
         this.updateDoctorHeaderUI();
-        this.showToast('تم رفع الصورة بنجاح وتخزينها في Firebase Storage!', 'success');
+        this.showToast('تم رفع الصورة وتحديثها بنجاح في Firebase Storage!', 'success');
       } catch (err) {
         if (statusIndicator) statusIndicator.classList.add('hidden');
-        this.showToast(`خطأ في رفع الصورة: ${err.message || 'فشل الاتصال بـ Storage'}`, 'error');
+        if (btnUpload) {
+          btnUpload.disabled = false;
+          btnUpload.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> <span>رفع وتحديث الصورة</span>';
+        }
+        this.showToast(`تعذر رفع الصورة: ${err.message || 'تحقق من إعدادات Firebase Storage'}`, 'error');
       }
     };
 
@@ -464,25 +476,26 @@ export class DoctorManager {
     if (!container) return;
 
     if (this.invitations.length === 0) {
-      container.innerHTML = `<p class="text-xs text-slate-500 py-3">لا توجد طلبات دعوة مرسلة في Firestore حالياً.</p>`;
+      container.innerHTML = `<p class="text-xs text-slate-500 py-3">لا توجد طلبات دعوة مرسلة حالياً.</p>`;
       return;
     }
 
+    // Doctor view: show status only. Acceptance is done by the staff from THEIR OWN session.
     container.innerHTML = this.invitations.map(inv => `
       <div class="p-3.5 rounded-xl glass-panel flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-200 dark:border-slate-800">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 flex items-center justify-center font-bold text-sm">
-            <i class="fas fa-user-check"></i>
+            <i class="fas fa-user-${inv.status === 'accepted' ? 'check' : 'clock'}"></i>
           </div>
           <div>
             <div class="flex items-center gap-2">
               <span class="font-extrabold text-sm text-slate-900 dark:text-white">${inv.assistantEmail}</span>
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                inv.status === 'accepted' 
-                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300' 
+                inv.status === 'accepted'
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300'
                   : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300'
               }">
-                ${inv.status === 'accepted' ? '✓ مقبول (تم التحقق من الحساب)' : '⏳ معلق (بانتظار قبول الموظف)'}
+                ${inv.status === 'accepted' ? '✓ مقبول — الموظف وافق على الدعوة' : '⏳ معلق — بانتظار قبول الموظف بنفسه'}
               </span>
             </div>
             <p class="text-xs text-slate-500 mt-0.5">${inv.role}</p>
@@ -490,30 +503,15 @@ export class DoctorManager {
         </div>
 
         <div class="flex items-center gap-2 self-end sm:self-center">
-          ${inv.status === 'pending' ? `
-            <button data-accept-inv-id="${inv.id}" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1">
-              <i class="fas fa-check"></i>
-              <span>تأكيد وقبول الدعوة</span>
-            </button>
-          ` : `
-            <span class="text-xs font-bold text-emerald-600 flex items-center gap-1">
-              <i class="fas fa-shield"></i> مسئول معتمد وموثق
-            </span>
-          `}
+          ${inv.status === 'accepted'
+            ? `<span class="text-xs font-bold text-emerald-600 flex items-center gap-1"><i class="fas fa-shield-check"></i> مسؤول معتمد</span>`
+            : `<span class="text-xs text-amber-600 font-bold flex items-center gap-1"><i class="fas fa-hourglass-half"></i> ينتظر قبول الموظف</span>`
+          }
         </div>
       </div>
     `).join('');
-
-    container.querySelectorAll('[data-accept-inv-id]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const invId = btn.dataset.acceptInvId;
-        await FirestoreInvitations.acceptInvitation(invId);
-        const match = this.invitations.find(i => i.id === invId);
-        if (match) match.status = 'accepted';
-        this.showToast('تم تحديث حالة الدعوة في Firestore إلى (Accepted) وتفعيل الصلاحية.', 'success');
-        this.renderInvitationsList();
-      });
-    });
+    // NOTE: No accept button here. The staff member must log in with their own account
+    // and click the accept button in the pending-invitation-banner section.
   }
 
   renderSchedule() {

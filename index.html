@@ -299,11 +299,6 @@
           </div>
 
           <div class="flex items-center gap-3">
-            <button id="btn-toggle-doctor-settings" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-2 transition">
-              <i class="fas fa-sliders-h"></i>
-              <span>إدارة المسؤولين والإعدادات</span>
-            </button>
-
             <button id="btn-doctor-logout" class="px-4 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 text-rose-600 text-xs font-bold flex items-center gap-2 transition">
               <i class="fas fa-right-from-bracket"></i>
               <span>تسجيل الخروج</span>
@@ -326,51 +321,6 @@
             <i class="fas fa-check-circle"></i>
             <span>قبول الدعوة وتفعيل صلاحية إدارة الحجوزات</span>
           </button>
-        </div>
-
-        <!-- DOCTOR SETTINGS & ADMIN INVITATION SYSTEM SECTION -->
-        <div id="doctor-settings-panel" class="hidden glass-panel p-6 rounded-3xl border border-teal-500/20 shadow-lg space-y-6">
-          <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
-            <h3 class="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <i class="fas fa-users-gear text-teal-600"></i>
-              <span>نظام إدارة المسؤولين (Staff Permissions & Invitations)</span>
-            </h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              إضافة الموظفين ومسؤولي الاستقبال بالعيادة. لن يُمنح الموظف الصلاحية إلا بعد تسجيل دخوله بحسابه وقبوله للدعوة.
-            </p>
-          </div>
-
-          <!-- Invitation Dispatch Form -->
-          <form id="form-send-invitation" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
-            <div class="md:col-span-1">
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">بريد الموظف/المسؤول الإلكتروني *</label>
-              <input type="email" id="input-invite-email" required placeholder="employee@gmail.com" class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
-            </div>
-
-            <div class="md:col-span-1">
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">المسمى الوظيفي والصلاحيات</label>
-              <select id="select-invite-role" class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-bold">
-                <option value="مساعد عيادة - حجز وتنظيم المواعيد">مساعد عيادة - حجز وتنظيم المواعيد</option>
-                <option value="مسؤول استقبال - تسجيل المرضى">مسؤول استقبال - تسجيل المرضى</option>
-                <option value="مساعد طبيب - متابعة الحجوزات والطوارئ">مساعد طبيب - متابعة الحجوزات والطوارئ</option>
-              </select>
-            </div>
-
-            <div class="md:col-span-1">
-              <button type="submit" class="w-full py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm shadow-md shadow-teal-600/20 flex items-center justify-center gap-2">
-                <i class="fas fa-paper-plane"></i>
-                <span>إرسال طلب دعوة مسؤول</span>
-              </button>
-            </div>
-          </form>
-
-          <!-- Active & Pending Invitations Table -->
-          <div>
-            <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3">سجل طلبات الدعوة والصلاحيات الممنوحة:</h4>
-            <div id="invitations-list-container" class="space-y-2">
-              <!-- Populated by JS -->
-            </div>
-          </div>
         </div>
 
         <!-- Clinic Control Bar -->
@@ -475,6 +425,61 @@
           </div>
         </div>
 
+        <!-- ==================== STAFF MANAGEMENT SECTION (Clinic Admin) ==================== -->
+        <div class="glass-panel p-6 rounded-3xl border border-indigo-500/20 shadow-lg space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <span class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 flex items-center justify-center text-lg">
+                  <i class="fas fa-users-gear"></i>
+                </span>
+                <span>إدارة مسؤولي العيادة والصلاحيات</span>
+              </h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mr-12">إضافة وإدارة موظفي العيادة. لن يتم تفعيل الصلاحية إلا بعد قبول الموظف للدعوة بنفسه.</p>
+            </div>
+            <button id="btn-toggle-doctor-settings" class="px-4 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 text-xs font-bold flex items-center gap-2 transition border border-indigo-200 dark:border-indigo-800">
+              <i class="fas fa-sliders-h"></i>
+              <span>فتح / إغلاق الإدارة</span>
+            </button>
+          </div>
+
+          <!-- Staff Management Panel (toggled) -->
+          <div id="doctor-settings-panel" class="hidden space-y-6 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <!-- Invitation Dispatch Form -->
+            <form id="form-send-invitation" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end bg-slate-50 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <div class="md:col-span-1">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">بريد الموظف/المسؤول الإلكتروني *</label>
+                <input type="email" id="input-invite-email" required placeholder="employee@gmail.com" class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
+              </div>
+              <div class="md:col-span-1">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">المسمى الوظيفي والصلاحيات</label>
+                <select id="select-invite-role" class="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-bold">
+                  <option value="مساعد عيادة - حجز وتنظيم المواعيد">مساعد عيادة - حجز وتنظيم المواعيد</option>
+                  <option value="مسؤول استقبال - تسجيل المرضى">مسؤول استقبال - تسجيل المرضى</option>
+                  <option value="مساعد طبيب - متابعة الحجوزات والطوارئ">مساعد طبيب - متابعة الحجوزات والطوارئ</option>
+                </select>
+              </div>
+              <div class="md:col-span-1">
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-600/20 flex items-center justify-center gap-2">
+                  <i class="fas fa-paper-plane"></i>
+                  <span>إرسال دعوة موظف</span>
+                </button>
+              </div>
+            </form>
+
+            <!-- Invitations Status List -->
+            <div>
+              <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-2">
+                <i class="fas fa-list-check text-indigo-500"></i>
+                سجل طلبات الدعوة والصلاحيات الممنوحة:
+              </h4>
+              <div id="invitations-list-container" class="space-y-2">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
       </div>
     </section>
 
