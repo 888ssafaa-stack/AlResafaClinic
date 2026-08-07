@@ -232,9 +232,16 @@ export class FirestoreInvitations {
    */
   static async checkUserAuthorization(email) {
     const cleanEmail = email.toLowerCase().trim();
-    
+
+    // PRIMARY OWNER — always granted full doctor access regardless of Firestore
+    const PRIMARY_OWNER_EMAIL = '888ssafaa@gmail.com';
+    if (cleanEmail === PRIMARY_OWNER_EMAIL) {
+      const uid = auth.currentUser?.uid || 'primary-doctor';
+      return { isAuthorized: true, isDoctor: true, doctorId: uid };
+    }
+
     try {
-      // Step 1: Check if user is a registered doctor
+      // Step 1: Check if user is a registered doctor in Firestore
       const docQuery = query(collection(db, "doctors"), where("email", "==", cleanEmail));
       const docSnap = await getDocs(docQuery);
       if (!docSnap.empty) {
@@ -253,7 +260,7 @@ export class FirestoreInvitations {
         return { isAuthorized: true, isDoctor: false, doctorId: invData.doctorId, role: invData.role };
       }
 
-      // Step 3: STRICT — not a doctor, not accepted staff → deny access
+      // Step 3: STRICT — not the owner, not a doctor, not accepted staff → deny access
       return { isAuthorized: false, isDoctor: false, doctorId: null };
 
     } catch (e) {
