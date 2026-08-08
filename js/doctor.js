@@ -380,20 +380,22 @@ export class DoctorManager {
         }
 
         try {
+          const safeVal = (id) => (document.getElementById(id)?.value || '').trim();
+          
           const profileData = {
-            name: document.getElementById('doc-profile-name').value,
-            dob: document.getElementById('doc-profile-dob').value,
-            phone: document.getElementById('doc-profile-phone').value,
-            speciality: document.getElementById('doc-profile-speciality').value,
-            experience: document.getElementById('doc-profile-experience').value,
-            university: document.getElementById('doc-profile-university').value,
-            workplace: document.getElementById('doc-profile-workplace').value,
-            syndicate: document.getElementById('doc-profile-syndicate').value,
-            currency: document.getElementById('doc-profile-currency').value,
-            province: document.getElementById('doc-profile-province').value,
-            address: document.getElementById('doc-profile-address').value,
-            assistantEmail: document.getElementById('doc-profile-assistant').value,
-            email: this.authenticatedUser?.email || '',
+            name: safeVal('doc-profile-name'),
+            dob: safeVal('doc-profile-dob'),
+            phone: safeVal('doc-profile-phone'),
+            speciality: safeVal('doc-profile-speciality'),
+            experience: safeVal('doc-profile-experience'),
+            university: safeVal('doc-profile-university'),
+            workplace: safeVal('doc-profile-workplace'),
+            syndicate: safeVal('doc-profile-syndicate'),
+            currency: safeVal('doc-profile-currency'),
+            province: safeVal('doc-profile-province'),
+            address: safeVal('doc-profile-address'),
+            assistantEmail: safeVal('doc-profile-assistant').toLowerCase(),
+            email: (this.authenticatedUser?.email || '').toLowerCase().trim(),
             avatar: this.authenticatedUser?.photoURL || ''
           };
 
