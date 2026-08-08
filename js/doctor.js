@@ -61,12 +61,25 @@ export class DoctorManager {
       this.selectedDoctorId = authStatus.doctorId || 'doc-1';
 
       if (authGuardContainer) authGuardContainer.classList.add('hidden');
-      if (doctorContentContainer) doctorContentContainer.classList.remove('hidden');
       
-      this.updateDoctorHeaderUI();
-      this.loadInvitations();
-      this.checkPendingAssistantInvitations();
-      this.setupFirestoreBookingsListener();
+      // Route to Super Admin View if Owner
+      const viewSuperAdmin = document.getElementById('view-superadmin');
+      if (authStatus.isOwner) {
+        if (doctorContentContainer) doctorContentContainer.classList.add('hidden');
+        if (viewSuperAdmin) {
+          viewSuperAdmin.classList.remove('hidden');
+          this.loadSuperAdminDashboard();
+        }
+      } else {
+        if (viewSuperAdmin) viewSuperAdmin.classList.add('hidden');
+        if (doctorContentContainer) doctorContentContainer.classList.remove('hidden');
+        
+        this.updateDoctorHeaderUI();
+        this.loadDoctorProfileData();
+        this.loadInvitations();
+        this.checkPendingAssistantInvitations();
+        this.setupFirestoreBookingsListener();
+      }
     } else {
       if (authGuardContainer) authGuardContainer.classList.remove('hidden');
       if (doctorContentContainer) doctorContentContainer.classList.add('hidden');
@@ -101,7 +114,81 @@ export class DoctorManager {
       if (this.authenticatedUser.photoURL) {
         currentDoc.avatar = this.authenticatedUser.photoURL;
       }
-      StorageManager.setDoctors(this.doctors);
+    }
+  }
+
+  // ==================== DOCTOR PROFILE DATA LOGIC ====================
+  async loadDoctorProfileData() {
+    try {
+      const docSnap = await window.getDoc(window.doc(window.db, 'doctors', this.selectedDoctorId));
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        document.getElementById('doc-profile-name').value = data.name || this.authenticatedUser?.displayName || '';
+        document.getElementById('doc-profile-dob').value = data.dob || '';
+        document.getElementById('doc-profile-phone').value = data.phone || '';
+        document.getElementById('doc-profile-speciality').value = data.speciality || '';
+        document.getElementById('doc-profile-experience').value = data.experience || '';
+        document.getElementById('doc-profile-university').value = data.university || '';
+        document.getElementById('doc-profile-workplace').value = data.workplace || 'وزارة الصحة';
+        document.getElementById('doc-profile-syndicate').value = data.syndicate || '';
+        document.getElementById('doc-profile-currency').value = data.currency || 'دينار عراقي';
+        document.getElementById('doc-profile-province').value = data.province || 'بغداد';
+        document.getElementById('doc-profile-address').value = data.address || '';
+        document.getElementById('doc-profile-assistant').value = data.assistantEmail || '';
+
+        const badge = document.getElementById('doc-profile-status-badge');
+        if (badge) {
+          if (data.status === 'approved') {
+            badge.className = 'px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 bg-emerald-100 text-emerald-700';
+            badge.innerHTML = '<i class="fas fa-check-circle"></i> حالة الملف: معتمد ومنشور';
+          } else {
+            badge.className = 'px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 bg-amber-100 text-amber-700';
+            badge.innerHTML = '<i class="fas fa-clock"></i> حالة الملف: قيد المراجعة';
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to load doctor profile:", e);
+    }
+  }
+
+  // ==================== SUPER ADMIN LOGIC ====================
+  async loadSuperAdminDashboard() {
+    try {
+      const doctors = await FirestoreInvitations.getAllDoctorsForAdmin();
+      const tbody = document.getElementById('superadmin-doctors-tbody');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      doctors.forEach(docData => {
+        const isApproved = docData.status === 'approved';
+        const statusBadge = isApproved 
+          ? `<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold"><i class="fas fa-check-circle mr-1"></i> معتمد</span>`
+          : `<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold"><i class="fas fa-clock mr-1"></i> قيد المراجعة</span>`;
+        
+        const actionBtn = isApproved 
+          ? `<button disabled class="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-400 text-[10px] font-bold cursor-not-allowed">تم الاعتماد</button>`
+          : `<button onclick="window.approveDoctorProfile('${docData.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold shadow-md shadow-emerald-600/20 transition transform hover:-translate-y-0.5">اعتماد ونشر</button>`;
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition">
+            <td class="p-4 flex items-center gap-3">
+              <img src="${docData.avatar || 'assets/icon.jpg'}" class="w-8 h-8 rounded-full object-cover">
+              <div>
+                <div class="font-bold text-slate-900 dark:text-white">${docData.name || 'بدون اسم'}</div>
+                <div class="text-[10px] text-slate-500 font-mono">${docData.email}</div>
+              </div>
+            </td>
+            <td class="p-4 text-slate-600 dark:text-slate-400 font-bold">${docData.speciality || '-'}</td>
+            <td class="p-4 text-slate-600 dark:text-slate-400 font-mono" dir="ltr">${docData.phone || '-'}</td>
+            <td class="p-4 text-slate-600 dark:text-slate-400">${docData.province || '-'}</td>
+            <td class="p-4">${statusBadge}</td>
+            <td class="p-4 text-center">${actionBtn}</td>
+          </tr>
+        `;
+      });
+    } catch (e) {
+      this.showToast('تعذر تحميل بيانات الأطباء للوحة الإدارة.', 'error');
     }
   }
 
@@ -262,6 +349,78 @@ export class DoctorManager {
 
     if (tabBtnProfile) tabBtnProfile.addEventListener('click', () => switchTab('profile'));
     if (tabBtnManagement) tabBtnManagement.addEventListener('click', () => switchTab('management'));
+
+    const btnSuperAdminLogout = document.getElementById('btn-superadmin-logout');
+    if (btnSuperAdminLogout) {
+      btnSuperAdminLogout.addEventListener('click', async () => {
+        await logOutFirebaseUser();
+        this.authenticatedUser = null;
+        localStorage.removeItem('afiacare_auth_user');
+        this.showToast('تم تسجيل الخروج بنجاح.', 'info');
+        
+        const viewSuperAdmin = document.getElementById('view-superadmin');
+        const authGuardContainer = document.getElementById('auth-guard-container');
+        if (viewSuperAdmin) viewSuperAdmin.classList.add('hidden');
+        if (authGuardContainer) authGuardContainer.classList.remove('hidden');
+        
+        this.checkAuthGuardState();
+      });
+    }
+
+    // ================== DOCTOR PROFILE FORM SUBMIT ==================
+    const profileForm = document.getElementById('form-doctor-profile');
+    if (profileForm) {
+      profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btnSave = document.getElementById('btn-save-profile');
+        if (btnSave) {
+          btnSave.disabled = true;
+          btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+        }
+
+        try {
+          const profileData = {
+            name: document.getElementById('doc-profile-name').value,
+            dob: document.getElementById('doc-profile-dob').value,
+            phone: document.getElementById('doc-profile-phone').value,
+            speciality: document.getElementById('doc-profile-speciality').value,
+            experience: document.getElementById('doc-profile-experience').value,
+            university: document.getElementById('doc-profile-university').value,
+            workplace: document.getElementById('doc-profile-workplace').value,
+            syndicate: document.getElementById('doc-profile-syndicate').value,
+            currency: document.getElementById('doc-profile-currency').value,
+            province: document.getElementById('doc-profile-province').value,
+            address: document.getElementById('doc-profile-address').value,
+            assistantEmail: document.getElementById('doc-profile-assistant').value,
+            email: this.authenticatedUser?.email || '',
+            avatar: this.authenticatedUser?.photoURL || ''
+          };
+
+          const newStatus = await FirestoreInvitations.saveDoctorProfile(this.selectedDoctorId, profileData);
+          this.showToast('تم حفظ البيانات بنجاح! الملف ' + (newStatus === 'approved' ? 'معتمد' : 'قيد المراجعة'), 'success');
+          
+          // Auto-invite assistant if email provided
+          if (profileData.assistantEmail && profileData.assistantEmail.trim() !== '') {
+            await FirestoreInvitations.sendInvitation(
+              this.selectedDoctorId, 
+              profileData.assistantEmail.trim(), 
+              'مساعد عيادة - حجز وتنظيم المواعيد'
+            );
+            this.showToast('تم إرسال دعوة لموظف العيادة تلقائياً.', 'success');
+          }
+
+          this.loadDoctorProfileData();
+        } catch (err) {
+          this.showToast('خطأ أثناء الحفظ: ' + err.message, 'error');
+        } finally {
+          if (btnSave) {
+            btnSave.disabled = false;
+            btnSave.innerHTML = '<i class="fas fa-save"></i> <span>حفظ البيانات وإرسال للمراجعة</span>';
+          }
+        }
+      });
+    }
 
     // Toggle Settings Panel
     const btnSettingsToggle = document.getElementById('btn-toggle-doctor-settings');
@@ -689,3 +848,19 @@ export class DoctorManager {
     if (statOccupancy) statOccupancy.textContent = `${occupancyPercent}%`;
   }
 }
+
+// Global function for Super Admin action
+window.approveDoctorProfile = async (doctorId) => {
+  try {
+    if (confirm('هل أنت متأكد من اعتماد ونشر ملف هذا الطبيب؟')) {
+      await window.FirestoreInvitations.approveDoctor(doctorId);
+      // Ensure we call loadSuperAdminDashboard on the existing instance if possible
+      // But since we are outside the class, we can trigger a reload or custom event
+      alert('تم اعتماد ملف الطبيب بنجاح وتفعيله!');
+      location.reload();
+    }
+  } catch (err) {
+    console.error(err);
+    alert('حدث خطأ أثناء اعتماد الطبيب.');
+  }
+};

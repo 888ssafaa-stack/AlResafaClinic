@@ -237,7 +237,43 @@
       </div>
     </section>
 
-    <!-- ==================== VIEW 2: DOCTOR / CLINIC DASHBOARD ==================== -->
+    <!-- ==================== VIEW 2: SUPER ADMIN DASHBOARD ==================== -->
+    <section id="view-superadmin" class="app-view hidden space-y-8">
+      <div class="glass-panel p-6 rounded-3xl border border-rose-500/30 shadow-lg">
+        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
+          <div>
+            <h1 class="text-2xl font-black text-rose-700 dark:text-rose-400 flex items-center gap-3">
+              <i class="fas fa-crown"></i>
+              <span>لوحة تحكم مالك التطبيق (Super Admin)</span>
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">مراجعة واعتماد ملفات الأطباء للنشر.</p>
+          </div>
+          <button id="btn-superadmin-logout" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-2">
+            <i class="fas fa-right-from-bracket"></i> خروج
+          </button>
+        </div>
+        
+        <div class="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <table class="w-full text-right text-xs">
+            <thead class="bg-rose-50 dark:bg-rose-950/20 text-rose-800 dark:text-rose-300 font-extrabold border-b border-rose-200 dark:border-rose-800">
+              <tr>
+                <th class="p-4">الطبيب</th>
+                <th class="p-4">الاختصاص</th>
+                <th class="p-4">الهاتف (واتساب)</th>
+                <th class="p-4">المحافظة</th>
+                <th class="p-4">الحالة</th>
+                <th class="p-4 text-center">إجراءات المالك</th>
+              </tr>
+            </thead>
+            <tbody id="superadmin-doctors-tbody" class="divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-950/40">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: DOCTOR / CLINIC DASHBOARD ==================== -->
     <section id="view-doctor" class="app-view hidden space-y-8">
       
       <!-- LOGIN SCREEN (Displayed if not signed in) -->
@@ -336,10 +372,134 @@
               </button>
             </div>
           </div>
+
+          <!-- COMPREHENSIVE DOCTOR PROFILE FORM -->
+          <form id="form-doctor-profile" class="glass-panel p-6 sm:p-8 rounded-3xl border border-teal-500/20 shadow-lg space-y-6">
+            <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
+              <h3 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <i class="fas fa-address-card text-teal-600"></i>
+                المعلومات الشخصية والمهنية (إلزامية)
+              </h3>
+              <p class="text-xs text-slate-500 mt-1">يرجى تعبئة كافة الحقول بدقة. لن يتم نشر الملف أو تفعيله إلا بعد مراجعته واعتماده من قبل إدارة التطبيق.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <!-- Name & DOB -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">الاسم الثلاثي مع اللقب *</label>
+                <input type="text" id="doc-profile-name" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">تاريخ المواليد *</label>
+                <input type="date" id="doc-profile-dob" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">رقم هاتف الواتساب (للحجوزات) *</label>
+                <input type="tel" id="doc-profile-phone" required placeholder="07xxxxxxxxx" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm text-left" dir="ltr">
+              </div>
+
+              <!-- Professional Info -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">الاختصاص الطبي الدقيق *</label>
+                <input type="text" id="doc-profile-speciality" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">سنوات الخبرة *</label>
+                <input type="number" id="doc-profile-experience" required min="0" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">الجامعة المتخرج منها *</label>
+                <input type="text" id="doc-profile-university" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
+              </div>
+
+              <!-- Work & Registration -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">مكان العمل الحالي *</label>
+                <select id="doc-profile-workplace" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-bold">
+                  <option value="وزارة الصحة">وزارة الصحة</option>
+                  <option value="متقاعد">متقاعد</option>
+                  <option value="قطاع خاص فقط">قطاع خاص فقط</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">رقم هوية نقابة الأطباء *</label>
+                <input type="text" id="doc-profile-syndicate" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-mono">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">العملة المفضلة للكشفية *</label>
+                <select id="doc-profile-currency" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-bold">
+                  <option value="دينار عراقي">دينار عراقي</option>
+                  <option value="دولار أمريكي">دولار أمريكي</option>
+                </select>
+              </div>
+
+              <!-- Clinic Location -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">المحافظة *</label>
+                <select id="doc-profile-province" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-bold">
+                  <option value="بغداد">بغداد</option>
+                  <option value="البصرة">البصرة</option>
+                  <option value="نينوى">نينوى</option>
+                  <option value="أربيل">أربيل</option>
+                  <option value="النجف">النجف</option>
+                  <option value="ذي قار">ذي قار</option>
+                  <option value="كركوك">كركوك</option>
+                  <option value="الأنبار">الأنبار</option>
+                  <option value="ديالى">ديالى</option>
+                  <option value="المثنى">المثنى</option>
+                  <option value="القادسية">القادسية</option>
+                  <option value="ميسان">ميسان</option>
+                  <option value="واسط">واسط</option>
+                  <option value="صلاح الدين">صلاح الدين</option>
+                  <option value="دهوك">دهوك</option>
+                  <option value="السليمانية">السليمانية</option>
+                  <option value="بابل">بابل</option>
+                  <option value="كربلاء">كربلاء</option>
+                </select>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">عنوان العيادة بالتفصيل (المدينة، الشارع، أقرب نقطة دالة) *</label>
+                <input type="text" id="doc-profile-address" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
+              </div>
+
+              <!-- Staff Invite -->
+              <div class="md:col-span-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+                <div class="bg-indigo-50 dark:bg-indigo-950/20 p-4 rounded-2xl border border-indigo-200 dark:border-indigo-900/50">
+                  <label class="block text-xs font-bold text-indigo-900 dark:text-indigo-300 mb-1">
+                    <i class="fas fa-user-tie ml-1"></i> إيميل موظف إدارة الحجوزات (اختياري)
+                  </label>
+                  <p class="text-[10px] text-indigo-700 dark:text-indigo-400 mb-2">سيتم إرسال دعوة لهذا الإيميل بصلاحية مساعد عيادة لإدارة المواعيد نيابة عنك.</p>
+                  <input type="email" id="doc-profile-assistant" placeholder="assistant@gmail.com" class="w-full md:w-1/2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-700 text-sm">
+                </div>
+              </div>
+            </div>
+
+            <!-- Profile Status and Save Button -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-800">
+              <div id="doc-profile-status-badge" class="px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 bg-slate-100 text-slate-600">
+                <i class="fas fa-circle-info"></i> حالة الملف: جديد
+              </div>
+              <button type="submit" id="btn-save-profile" class="w-full sm:w-auto px-8 py-3 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white font-black text-sm shadow-lg shadow-teal-600/30 flex items-center justify-center gap-2 transition transform hover:scale-105">
+                <i class="fas fa-save"></i>
+                <span>حفظ البيانات وإرسال للمراجعة</span>
+              </button>
+            </div>
+          </form>
         </div>
 
         <!-- ==================== TAB 2: CLINIC MANAGEMENT ==================== -->
-        <div id="tab-clinic-management" class="hidden space-y-8 animate-fade-in">
+        <div id="tab-clinic-management" class="hidden relative space-y-8 animate-fade-in">
+          
+          <!-- UNDER CONSTRUCTION OVERLAY -->
+          <div class="absolute inset-0 z-10 bg-slate-900/80 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center p-8 text-center border border-slate-700">
+            <div class="w-20 h-20 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center text-4xl mb-4 border border-amber-500/30">
+              <i class="fas fa-person-digging"></i>
+            </div>
+            <h2 class="text-2xl font-black text-white mb-2">واجهة إدارة الحجوزات قيد التطوير</h2>
+            <p class="text-slate-300 max-w-md text-sm leading-relaxed">
+              هذه الواجهة منفصلة حالياً وغير مفعلة بشكل كامل لحين اكتمال الربط لاحقاً، كما طلبت الإدارة. لن يمكن التعديل على الجداول حالياً لتجنب أي إدخالات غير مكتملة.
+            </p>
+          </div>
           <!-- Clinic Control Bar -->
         <div class="glass-panel p-6 rounded-3xl border border-teal-500/20 shadow-lg space-y-6">
           <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">

@@ -46,7 +46,6 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 /**
  * 1. STRICT REAL GOOGLE AUTHENTICATION (NO FALLBACKS / NO MOCKS)
@@ -243,6 +242,7 @@ export class FirestoreInvitations {
       return {
         isAuthorized: true,
         isDoctor: true,
+        isOwner: true,
         doctorId: auth.currentUser?.uid ?? 'primary-doctor'
       };
     }
@@ -279,5 +279,54 @@ export class FirestoreInvitations {
       console.warn('Authorization check error:', e);
       return { isAuthorized: false, isDoctor: false, doctorId: null };
     }
+  }
+
+  /**
+   * ================== SUPER ADMIN & DOCTOR PROFILE METHODS ==================
+   */
+
+  // 1. Save or Update Doctor Profile (sets status to pending if new)
+  static async saveDoctorProfile(doctorId, profileData) {
+    const docRef = doc(db, 'doctors', doctorId);
+    const docSnap = await getDoc(docRef);
+    
+    let status = 'pending';
+    if (docSnap.exists()) {
+      const existingData = docSnap.data();
+      // Keep approved status if already approved, otherwise keep pending
+      status = existingData.status === 'approved' ? 'approved' : 'pending';
+    }
+
+    await setDoc(docRef, {
+      ...profileData,
+      status: status,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+
+    return status;
+  }
+
+  // 2. Fetch all doctors for Super Admin dashboard
+  static async getAllDoctorsForAdmin() {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'doctors'));
+      const list = [];
+      querySnapshot.forEach((docSnap) => {
+        list.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      return list;
+    } catch (e) {
+      console.error("Failed to fetch doctors for admin:", e);
+      return [];
+    }
+  }
+
+  // 3. Approve a doctor profile
+  static async approveDoctor(doctorId) {
+    const docRef = doc(db, 'doctors', doctorId);
+    await updateDoc(docRef, {
+      status: 'approved',
+      approvedAt: new Date().toISOString()
+    });
   }
 }
