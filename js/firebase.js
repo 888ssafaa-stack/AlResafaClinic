@@ -276,17 +276,29 @@ export class FirestoreInvitations {
         return { isAuthorized: true, isDoctor: true, doctorId: docSnap.docs[0].id };
       }
 
-      // Check accepted staff invitations
+      // Check staff invitations (accepted or pending)
       const invSnap = await getDocs(
         query(
           collection(db, 'clinic_invitations'),
-          where('assistantEmail', '==', cleanEmail),
-          where('status', '==', 'accepted')
+          where('assistantEmail', '==', cleanEmail)
         )
       );
       if (!invSnap.empty) {
-        const inv = invSnap.docs[0].data();
-        return { isAuthorized: true, isDoctor: false, doctorId: inv.doctorId, role: inv.role };
+        // Find accepted first, otherwise take pending
+        let invData = invSnap.docs.find(d => d.data().status === 'accepted')?.data();
+        if (!invData) {
+          invData = invSnap.docs.find(d => d.data().status === 'pending')?.data();
+        }
+        
+        if (invData) {
+          return { 
+            isAuthorized: true, 
+            isDoctor: false, 
+            doctorId: invData.doctorId, 
+            role: invData.role,
+            invitationStatus: invData.status 
+          };
+        }
       }
 
       // Not owner, not doctor, not accepted staff → deny

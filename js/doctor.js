@@ -428,12 +428,14 @@ export class DoctorManager {
           
           // Auto-invite assistant if email provided
           if (profileData.assistantEmail && profileData.assistantEmail.trim() !== '') {
-            await FirestoreInvitations.sendInvitation(
-              this.selectedDoctorId, 
-              profileData.assistantEmail.trim(), 
-              'مساعد عيادة - حجز وتنظيم المواعيد'
-            );
-            this.showToast('تم إرسال دعوة لموظف العيادة تلقائياً.', 'success');
+            await FirestoreInvitations.sendInvitation({
+              doctorId: this.selectedDoctorId,
+              doctorName: profileData.name,
+              doctorEmail: profileData.email,
+              assistantEmail: profileData.assistantEmail,
+              role: 'مساعد عيادة - حجز وتنظيم المواعيد'
+            });
+            this.showToast('تم تسجيل دعوة الموظف بنجاح في قاعدة البيانات (بدون إيميل فعلي).', 'success');
           }
 
           this.loadDoctorProfileData();
