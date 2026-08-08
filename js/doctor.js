@@ -125,7 +125,12 @@ export class DoctorManager {
         document.getElementById('doc-profile-name').value = data.name || this.authenticatedUser?.displayName || '';
         document.getElementById('doc-profile-dob').value = data.dob || '';
         document.getElementById('doc-profile-phone').value = data.phone || '';
-        document.getElementById('doc-profile-speciality').value = data.speciality || '';
+        
+        if (data.speciality) {
+          const specialtyRadio = document.querySelector(`input[name="doc-profile-speciality"][value="${data.speciality}"]`);
+          if (specialtyRadio) specialtyRadio.checked = true;
+        }
+
         document.getElementById('doc-profile-experience').value = data.experience || '';
         document.getElementById('doc-profile-university').value = data.university || '';
         const workplaceRadio = document.querySelector(`input[name="doc-profile-workplace"][value="${data.workplace || 'وزارة الصحة'}"]`);
@@ -418,7 +423,7 @@ export class DoctorManager {
             name: safeVal('doc-profile-name'),
             dob: safeVal('doc-profile-dob'),
             phone: safeVal('doc-profile-phone'),
-            speciality: safeVal('doc-profile-speciality'),
+            speciality: safeRadio('doc-profile-speciality'),
             experience: safeVal('doc-profile-experience'),
             university: safeVal('doc-profile-university'),
             workplace: safeRadio('doc-profile-workplace'),

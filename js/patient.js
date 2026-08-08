@@ -470,5 +470,42 @@ export class PatientManager {
     if (printBtn) {
       printBtn.onclick = () => window.print();
     }
+
+    const saveImageBtn = document.getElementById('btn-save-image');
+    if (saveImageBtn) {
+      saveImageBtn.onclick = async () => {
+        const ticketElement = document.getElementById('printable-ticket');
+        if (!ticketElement || !window.html2canvas) {
+          alert('تعذر تحميل مكتبة تحويل الصور. يرجى المحاولة بعد قليل.');
+          return;
+        }
+        
+        saveImageBtn.disabled = true;
+        saveImageBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>جاري الحفظ...</span>';
+        
+        try {
+          // Temporarily fix styling issues for rendering
+          const originalStyle = ticketElement.style.cssText;
+          ticketElement.style.backgroundColor = '#ffffff';
+          ticketElement.style.padding = '20px';
+          ticketElement.style.borderRadius = '16px';
+
+          const canvas = await window.html2canvas(ticketElement, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+          ticketElement.style.cssText = originalStyle;
+
+          const imgData = canvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.download = `تذكرة_حجز_${booking.id}.png`;
+          link.href = imgData;
+          link.click();
+        } catch (error) {
+          console.error("Error saving image", error);
+          alert('حدث خطأ أثناء حفظ الصورة.');
+        } finally {
+          saveImageBtn.disabled = false;
+          saveImageBtn.innerHTML = '<i class="fas fa-image"></i> <span>حفظ كصورة</span>';
+        }
+      };
+    }
   }
 }

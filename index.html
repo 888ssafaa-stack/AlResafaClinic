@@ -399,9 +399,28 @@
               </div>
 
               <!-- Professional Info -->
-              <div>
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">الاختصاص الطبي الدقيق *</label>
-                <input type="text" id="doc-profile-speciality" required class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm">
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">الاختصاص الطبي الدقيق *</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <label class="flex items-center gap-2 cursor-pointer text-sm p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                    <input type="radio" name="doc-profile-speciality" value="أمراض القلب والشرايين" class="w-4 h-4 text-teal-600" required> أمراض القلب والشرايين
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer text-sm p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                    <input type="radio" name="doc-profile-speciality" value="طب الأطفال وحديثي الولادة" class="w-4 h-4 text-teal-600" required> طب الأطفال وحديثي الولادة
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer text-sm p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                    <input type="radio" name="doc-profile-speciality" value="جراحة العظام والمفاصل" class="w-4 h-4 text-teal-600" required> جراحة العظام والمفاصل
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer text-sm p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                    <input type="radio" name="doc-profile-speciality" value="طب وجراحة الأسنان" class="w-4 h-4 text-teal-600" required> طب وجراحة الأسنان
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer text-sm p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                    <input type="radio" name="doc-profile-speciality" value="طب وجراحة العيون" class="w-4 h-4 text-teal-600" required> طب وجراحة العيون
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer text-sm p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition">
+                    <input type="radio" name="doc-profile-speciality" value="الطب العام والباطنية" class="w-4 h-4 text-teal-600" required> الطب العام والباطنية
+                  </label>
+                </div>
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">سنوات الخبرة *</label>
@@ -481,16 +500,6 @@
         <!-- ==================== TAB 2: CLINIC MANAGEMENT ==================== -->
         <div id="tab-clinic-management" class="hidden relative space-y-8 animate-fade-in">
           
-          <!-- UNDER CONSTRUCTION OVERLAY -->
-          <div class="absolute inset-0 z-10 bg-slate-900/80 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center p-8 text-center border border-slate-700">
-            <div class="w-20 h-20 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center text-4xl mb-4 border border-amber-500/30">
-              <i class="fas fa-person-digging"></i>
-            </div>
-            <h2 class="text-2xl font-black text-white mb-2">واجهة إدارة الحجوزات قيد التطوير</h2>
-            <p class="text-slate-300 max-w-md text-sm leading-relaxed">
-              هذه الواجهة منفصلة حالياً وغير مفعلة بشكل كامل لحين اكتمال الربط لاحقاً، كما طلبت الإدارة. لن يمكن التعديل على الجداول حالياً لتجنب أي إدخالات غير مكتملة.
-            </p>
-          </div>
           <!-- Clinic Control Bar -->
         <div class="glass-panel p-6 rounded-3xl border border-teal-500/20 shadow-lg space-y-6">
           <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -813,10 +822,16 @@
 
         <p class="text-[11px] text-slate-500">يرجى الحضور قبل الموعد بـ 15 دقيقة وإبراز التذكرة عند موظف الاستقبال.</p>
 
-        <button id="btn-do-print" class="w-full py-2.5 rounded-xl bg-teal-600 text-white font-bold text-xs flex items-center justify-center gap-2">
-          <i class="fas fa-print"></i>
-          <span>طباعة تذكرة الحجز</span>
-        </button>
+        <div class="flex gap-2 w-full mt-4">
+          <button id="btn-do-print" class="flex-1 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition">
+            <i class="fas fa-print"></i>
+            <span>طباعة</span>
+          </button>
+          <button id="btn-save-image" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs flex items-center justify-center gap-2 transition">
+            <i class="fas fa-image"></i>
+            <span>حفظ كصورة</span>
+          </button>
+        </div>
       </div>
 
     </div>
@@ -824,6 +839,9 @@
 
   <!-- Audio prayer background (Silent or low volume calligraphic feel) -->
   <audio id="audio-prayer" preload="none"></audio>
+
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <!-- Load ES Modules JS -->
   <script type="module" src="js/app.js"></script>
