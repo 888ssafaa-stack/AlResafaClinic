@@ -129,10 +129,16 @@ export class DoctorManager {
         document.getElementById('doc-profile-speciality').value = data.speciality || '';
         document.getElementById('doc-profile-experience').value = data.experience || '';
         document.getElementById('doc-profile-university').value = data.university || '';
-        document.getElementById('doc-profile-workplace').value = data.workplace || 'وزارة الصحة';
+        const workplaceRadio = document.querySelector(`input[name="doc-profile-workplace"][value="${data.workplace || 'وزارة الصحة'}"]`);
+        if (workplaceRadio) workplaceRadio.checked = true;
+
         document.getElementById('doc-profile-syndicate').value = data.syndicate || '';
-        document.getElementById('doc-profile-currency').value = data.currency || 'دينار عراقي';
-        document.getElementById('doc-profile-province').value = data.province || 'بغداد';
+        
+        const currencyRadio = document.querySelector(`input[name="doc-profile-currency"][value="${data.currency || 'دينار عراقي'}"]`);
+        if (currencyRadio) currencyRadio.checked = true;
+
+        const provinceInput = document.getElementById('doc-profile-province');
+        if (provinceInput) provinceInput.value = data.province || 'بغداد';
         document.getElementById('doc-profile-address').value = data.address || '';
         document.getElementById('doc-profile-assistant').value = data.assistantEmail || '';
 
@@ -399,6 +405,7 @@ export class DoctorManager {
 
         try {
           const safeVal = (id) => (document.getElementById(id)?.value || '').trim();
+          const safeRadio = (name) => (document.querySelector(`input[name="${name}"]:checked`)?.value || '').trim();
           
           const profileData = {
             name: safeVal('doc-profile-name'),
@@ -407,9 +414,9 @@ export class DoctorManager {
             speciality: safeVal('doc-profile-speciality'),
             experience: safeVal('doc-profile-experience'),
             university: safeVal('doc-profile-university'),
-            workplace: safeVal('doc-profile-workplace'),
+            workplace: safeRadio('doc-profile-workplace'),
             syndicate: safeVal('doc-profile-syndicate'),
-            currency: safeVal('doc-profile-currency'),
+            currency: safeRadio('doc-profile-currency'),
             province: safeVal('doc-profile-province'),
             address: safeVal('doc-profile-address'),
             assistantEmail: safeVal('doc-profile-assistant').toLowerCase(),
