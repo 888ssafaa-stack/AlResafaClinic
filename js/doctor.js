@@ -177,6 +177,7 @@ export class DoctorManager {
     // 2. PROMINENT FIREBASE STORAGE IMAGE FILE UPLOADER
     const fileInput = document.getElementById('doctor-avatar-file-input');
     const btnUpload = document.getElementById('btn-trigger-upload');
+    const statusIndicator = document.getElementById('upload-status-indicator');
 
     const handleFileUpload = async () => {
       const file = fileInput?.files[0];
@@ -185,24 +186,16 @@ export class DoctorManager {
         return;
       }
 
-      // Disable button and show status to prevent stuck state
       if (btnUpload) {
         btnUpload.disabled = true;
         btnUpload.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>جاري الرفع...</span>';
       }
-      const statusIndicator = document.getElementById('upload-status-indicator');
       if (statusIndicator) statusIndicator.classList.remove('hidden');
 
       try {
         // Always use the currently authenticated Firebase UID
         const uid = this.authenticatedUser?.uid || this.selectedDoctorId;
         const downloadUrl = await uploadProfileImageToStorage(uid, file);
-
-        if (statusIndicator) statusIndicator.classList.add('hidden');
-        if (btnUpload) {
-          btnUpload.disabled = false;
-          btnUpload.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> <span>رفع وتحديث الصورة</span>';
-        }
 
         // Update avatar in memory and localStorage
         if (this.authenticatedUser) {
@@ -219,22 +212,56 @@ export class DoctorManager {
 
         this.updateDoctorHeaderUI();
         this.showToast('تم رفع الصورة وتحديثها بنجاح في Firebase Storage!', 'success');
+        
+        // Clear file input so it can be triggered again if needed
+        if (fileInput) fileInput.value = '';
       } catch (err) {
+        this.showToast(`تعذر رفع الصورة: ${err.message || 'تحقق من إعدادات Firebase Storage'}`, 'error');
+      } finally {
         if (statusIndicator) statusIndicator.classList.add('hidden');
         if (btnUpload) {
           btnUpload.disabled = false;
-          btnUpload.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> <span>رفع وتحديث الصورة</span>';
+          btnUpload.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> <span>رفع وتحديث الصورة (Firebase Storage)</span>';
         }
-        this.showToast(`تعذر رفع الصورة: ${err.message || 'تحقق من إعدادات Firebase Storage'}`, 'error');
       }
     };
 
     if (btnUpload) {
       btnUpload.addEventListener('click', handleFileUpload);
     }
-    if (fileInput) {
-      fileInput.addEventListener('change', handleFileUpload);
-    }
+    // Removed fileInput change event listener to prevent duplicate/stuck uploads
+
+    // ================== TAB NAVIGATION LOGIC ==================
+    const tabBtnProfile = document.getElementById('tab-btn-profile');
+    const tabBtnManagement = document.getElementById('tab-btn-management');
+    const tabDoctorProfile = document.getElementById('tab-doctor-profile');
+    const tabClinicManagement = document.getElementById('tab-clinic-management');
+
+    const switchTab = (activeTab) => {
+      if (!tabBtnProfile || !tabBtnManagement || !tabDoctorProfile || !tabClinicManagement) return;
+      
+      const activeBtnClass = ['border-teal-600', 'text-teal-700', 'dark:text-teal-400', 'bg-teal-50/50', 'dark:bg-teal-900/20'];
+      const inactiveBtnClass = ['border-transparent', 'text-slate-500', 'dark:text-slate-400', 'hover:bg-slate-50', 'dark:hover:bg-slate-900/50'];
+
+      if (activeTab === 'profile') {
+        tabDoctorProfile.classList.remove('hidden');
+        tabClinicManagement.classList.add('hidden');
+        tabBtnProfile.classList.add(...activeBtnClass);
+        tabBtnProfile.classList.remove(...inactiveBtnClass);
+        tabBtnManagement.classList.remove(...activeBtnClass);
+        tabBtnManagement.classList.add(...inactiveBtnClass);
+      } else {
+        tabDoctorProfile.classList.add('hidden');
+        tabClinicManagement.classList.remove('hidden');
+        tabBtnManagement.classList.add(...activeBtnClass);
+        tabBtnManagement.classList.remove(...inactiveBtnClass);
+        tabBtnProfile.classList.remove(...activeBtnClass);
+        tabBtnProfile.classList.add(...inactiveBtnClass);
+      }
+    };
+
+    if (tabBtnProfile) tabBtnProfile.addEventListener('click', () => switchTab('profile'));
+    if (tabBtnManagement) tabBtnManagement.addEventListener('click', () => switchTab('management'));
 
     // Toggle Settings Panel
     const btnSettingsToggle = document.getElementById('btn-toggle-doctor-settings');
