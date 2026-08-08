@@ -266,7 +266,8 @@ export class DoctorManager {
     const btnUpload = document.getElementById('btn-trigger-upload');
     const statusIndicator = document.getElementById('upload-status-indicator');
 
-    const handleFileUpload = async () => {
+    const handleFileUpload = async (e) => {
+      if (e) e.preventDefault();
       const file = fileInput?.files[0];
       if (!file) {
         this.showToast('يرجى اختيار ملف صورة من جهازك أولاً.', 'error');
