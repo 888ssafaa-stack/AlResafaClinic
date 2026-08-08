@@ -113,13 +113,16 @@ export class PatientManager {
     const grid = document.getElementById('doctors-grid');
     if (!grid) return;
 
-    this.doctors = StorageManager.getDoctors();
+    // DO NOT override this.doctors with local storage
+    // this.doctors is already fetched from Firestore in init()
 
     let filtered = this.doctors.filter(doc => {
-      const matchSpec = this.selectedSpecialty === 'all' || doc.specialtyId === this.selectedSpecialty;
-      const matchSearch = doc.name.toLowerCase().includes(this.searchQuery) || 
-                          doc.specialtyName.toLowerCase().includes(this.searchQuery) ||
-                          doc.clinic.toLowerCase().includes(this.searchQuery);
+      // Basic matching for specialty, ignoring strict IDs for now if they type freely
+      const matchSpec = this.selectedSpecialty === 'all' || (doc.speciality || '').includes(this.selectedSpecialty);
+      const matchSearch = (doc.name || '').toLowerCase().includes(this.searchQuery) || 
+                          (doc.speciality || '').toLowerCase().includes(this.searchQuery) ||
+                          (doc.address || '').toLowerCase().includes(this.searchQuery) ||
+                          (doc.province || '').toLowerCase().includes(this.searchQuery);
       return matchSpec && matchSearch;
     });
 
@@ -129,47 +132,50 @@ export class PatientManager {
           <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-teal-50 dark:bg-slate-800 flex items-center justify-center text-teal-600 text-3xl">
             <i class="fas fa-user-md"></i>
           </div>
-          <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">لم يتم العثور على أطباء مطبقين للبحث</h3>
+          <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100">لم يتم العثور على أطباء مطابقين للبحث</h3>
           <p class="text-slate-500 mt-2">جرب تغيير التخصص أو كلمة البحث.</p>
         </div>
       `;
       return;
     }
 
-    grid.innerHTML = filtered.map(doc => `
+    grid.innerHTML = filtered.map(doc => {
+      const defaultAvatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(doc.name || 'طبيب') + '&background=0D8B8B&color=fff';
+      
+      return `
       <div class="glass-panel p-6 rounded-2xl flex flex-col justify-between hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
         <div>
           <div class="flex items-start gap-4 mb-4">
-            <img src="${doc.avatar}" alt="${doc.name}" class="w-20 h-20 rounded-2xl object-cover border-2 border-teal-500 shadow-md">
+            <img src="${doc.avatar || defaultAvatar}" alt="${doc.name || 'طبيب'}" class="w-20 h-20 rounded-2xl object-cover border-2 border-teal-500 shadow-md">
             <div class="flex-1">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300">
-                  ${doc.specialtyName}
+                  ${doc.speciality || 'غير محدد'}
                 </span>
                 <span class="flex items-center text-amber-500 font-bold text-sm">
-                  <i class="fas fa-star text-xs ml-1"></i> ${doc.rating}
-                  <span class="text-slate-400 font-normal text-xs mr-1">(${doc.reviewsCount})</span>
+                  <i class="fas fa-star text-xs ml-1"></i> ${doc.rating || 'جديد'}
                 </span>
               </div>
-              <h3 class="text-lg font-extrabold text-slate-900 dark:text-slate-100 mt-2">${doc.name}</h3>
+              <h3 class="text-lg font-extrabold text-slate-900 dark:text-slate-100 mt-2">${doc.name || 'دكتور بدون اسم'}</h3>
               <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center mt-1">
-                <i class="fas fa-clinic-medical text-teal-600 ml-1.5"></i> ${doc.clinic}
+                <i class="fas fa-map-marker-alt text-teal-600 ml-1.5"></i> ${doc.province || ''} - ${doc.address || 'العنوان غير محدد'}
               </p>
             </div>
           </div>
 
           <p class="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 mb-4 leading-relaxed bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-            ${doc.bio}
+            <i class="fas fa-university text-slate-400 ml-1"></i> الشهادة: ${doc.university || 'غير محدد'}<br>
+            <i class="fas fa-hospital text-slate-400 ml-1"></i> العمل: ${doc.workplace || 'غير محدد'}
           </p>
 
           <div class="grid grid-cols-2 gap-2 text-xs py-3 border-t border-b border-slate-100 dark:border-slate-800 mb-4">
             <div class="flex items-center text-slate-600 dark:text-slate-400">
               <i class="fas fa-award text-amber-500 ml-2"></i>
-              <span>خبرة: ${doc.experienceYears} عاماً</span>
+              <span>خبرة: ${doc.experience || '0'}</span>
             </div>
             <div class="flex items-center text-slate-600 dark:text-slate-400">
               <i class="fas fa-money-bill-wave text-emerald-500 ml-2"></i>
-              <span>الكشفية: ${doc.fee} $</span>
+              <span>العملة: ${doc.currency || 'دينار عراقي'}</span>
             </div>
           </div>
         </div>
@@ -182,7 +188,8 @@ export class PatientManager {
           <span>حجز موعد الآن</span>
         </button>
       </div>
-    `).join('');
+      `;
+    }).join('');
 
     // Attach click events for booking buttons
     grid.querySelectorAll('.btn-open-booking').forEach(btn => {
@@ -194,17 +201,19 @@ export class PatientManager {
   }
 
   openBookingModal(doctorId) {
-    this.doctors = StorageManager.getDoctors();
+    // DO NOT override this.doctors with local storage
     this.activeBookingDoctor = this.doctors.find(d => d.id === doctorId);
     if (!this.activeBookingDoctor) return;
 
     this.selectedTimeSlot = null;
 
+    const defaultAvatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(this.activeBookingDoctor.name || 'طبيب') + '&background=0D8B8B&color=fff';
+
     // Fill doctor info in modal
-    document.getElementById('modal-doctor-name').textContent = this.activeBookingDoctor.name;
-    document.getElementById('modal-doctor-spec').textContent = this.activeBookingDoctor.specialtyName;
-    document.getElementById('modal-doctor-avatar').src = this.activeBookingDoctor.avatar;
-    document.getElementById('modal-doctor-fee').textContent = `${this.activeBookingDoctor.fee} $`;
+    document.getElementById('modal-doctor-name').textContent = this.activeBookingDoctor.name || 'طبيب';
+    document.getElementById('modal-doctor-spec').textContent = this.activeBookingDoctor.speciality || 'غير محدد';
+    document.getElementById('modal-doctor-avatar').src = this.activeBookingDoctor.avatar || defaultAvatar;
+    document.getElementById('modal-doctor-fee').textContent = `العملة: ${this.activeBookingDoctor.currency || 'دينار عراقي'}`;
 
     // Reset date & time slots
     const dateInput = document.getElementById('booking-date');
@@ -227,7 +236,9 @@ export class PatientManager {
     const container = document.getElementById('time-slots-container');
     if (!container || !this.activeBookingDoctor) return;
 
-    const slots = this.activeBookingDoctor.timeSlots;
+    // Fallback if doctor has no timeSlots configured
+    const defaultSlots = ['04:00 PM', '04:30 PM', '05:00 PM', '05:30 PM', '06:00 PM', '06:30 PM', '07:00 PM', '07:30 PM', '08:00 PM'];
+    const slots = this.activeBookingDoctor.timeSlots || defaultSlots;
     const date = this.selectedDate;
 
     container.innerHTML = slots.map(time => {
