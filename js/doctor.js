@@ -141,6 +141,14 @@ export class DoctorManager {
         document.getElementById('doc-profile-address').value = data.address || '';
         document.getElementById('doc-profile-assistant').value = data.assistantEmail || '';
 
+        // Load Avatar if present in Firestore
+        if (data.avatar) {
+          if (this.authenticatedUser) {
+            this.authenticatedUser.photoURL = data.avatar;
+          }
+          this.updateDoctorHeaderUI();
+        }
+
         const badge = document.getElementById('doc-profile-status-badge');
         if (badge) {
           if (data.status === 'approved') {

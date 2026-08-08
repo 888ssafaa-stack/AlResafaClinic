@@ -233,6 +233,24 @@ export class FirestoreInvitations {
   }
 
   /**
+   * Fetch only approved doctors for patient view
+   */
+  static async getApprovedDoctors() {
+    try {
+      const q = query(collection(db, "doctors"), where("status", "==", "approved"));
+      const querySnapshot = await getDocs(q);
+      const list = [];
+      querySnapshot.forEach((docSnap) => {
+        list.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      return list;
+    } catch (e) {
+      console.warn("Failed to fetch approved doctors:", e);
+      return [];
+    }
+  }
+
+  /**
    * Employee accepts pending invitation
    */
   static async acceptInvitation(invitationId) {

@@ -1,12 +1,12 @@
 // Patient Interface Controller
 import { StorageManager } from './storage.js';
 import { INITIAL_SPECIALTIES } from './data.js';
-import { FirestoreBookings } from './firebase.js';
+import { FirestoreBookings, FirestoreInvitations } from './firebase.js';
 
 export class PatientManager {
   constructor(showToastCallback) {
     this.showToast = showToastCallback;
-    this.doctors = StorageManager.getDoctors();
+    this.doctors = []; // Will be populated from Firestore
     this.specialties = INITIAL_SPECIALTIES;
     this.selectedSpecialty = 'all';
     this.searchQuery = '';
@@ -18,7 +18,15 @@ export class PatientManager {
     this.init();
   }
 
-  init() {
+  async init() {
+    this.doctors = await FirestoreInvitations.getApprovedDoctors();
+    
+    // Fallback if network fails and no approved doctors loaded
+    if (this.doctors.length === 0) {
+      const localDocs = StorageManager.getDoctors();
+      this.doctors = localDocs.filter(d => d.status === 'approved');
+    }
+
     this.renderSpecialtyFilters();
     this.renderDoctorCards();
     this.renderMyBookings();
