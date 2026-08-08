@@ -217,6 +217,22 @@ export class FirestoreInvitations {
   }
 
   /**
+   * Fetch a single doctor's profile data
+   */
+  static async getDoctorProfile(doctorId) {
+    try {
+      const docSnap = await getDoc(doc(db, "doctors", doctorId));
+      if (docSnap.exists()) {
+        return docSnap.data();
+      }
+      return null;
+    } catch (e) {
+      console.error("Failed to fetch doctor profile:", e);
+      return null;
+    }
+  }
+
+  /**
    * Employee accepts pending invitation
    */
   static async acceptInvitation(invitationId) {

@@ -120,9 +120,8 @@ export class DoctorManager {
   // ==================== DOCTOR PROFILE DATA LOGIC ====================
   async loadDoctorProfileData() {
     try {
-      const docSnap = await window.getDoc(window.doc(window.db, 'doctors', this.selectedDoctorId));
-      if (docSnap.exists()) {
-        const data = docSnap.data();
+      const data = await FirestoreInvitations.getDoctorProfile(this.selectedDoctorId);
+      if (data) {
         document.getElementById('doc-profile-name').value = data.name || this.authenticatedUser?.displayName || '';
         document.getElementById('doc-profile-dob').value = data.dob || '';
         document.getElementById('doc-profile-phone').value = data.phone || '';
@@ -880,9 +879,9 @@ export class DoctorManager {
 window.approveDoctorProfile = async (doctorId) => {
   try {
     if (confirm('هل أنت متأكد من اعتماد ونشر ملف هذا الطبيب؟')) {
-      await window.FirestoreInvitations.approveDoctor(doctorId);
-      // Ensure we call loadSuperAdminDashboard on the existing instance if possible
-      // But since we are outside the class, we can trigger a reload or custom event
+      // Need to import or reference FirestoreInvitations from the module scope
+      // Since this is in the same file as the import, we can just use it directly
+      await FirestoreInvitations.approveDoctor(doctorId);
       alert('تم اعتماد ملف الطبيب بنجاح وتفعيله!');
       location.reload();
     }
