@@ -276,42 +276,59 @@ export class DoctorManager {
 
       if (btnUpload) {
         btnUpload.disabled = true;
-        btnUpload.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>جاري الرفع...</span>';
+        btnUpload.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>جاري المعالجة...</span>';
       }
       if (statusIndicator) statusIndicator.classList.remove('hidden');
 
-      try {
-        // Always use the currently authenticated Firebase UID
-        const uid = this.authenticatedUser?.uid || this.selectedDoctorId;
-        const downloadUrl = await uploadProfileImageToStorage(uid, file);
+      const reader = new FileReader();
+      
+      reader.onloadend = async () => {
+        try {
+          const base64Data = reader.result;
+          const uid = this.authenticatedUser?.uid || this.selectedDoctorId;
+          
+          // Save Base64 directly to Firestore (bypassing Storage)
+          const finalUrl = await uploadProfileImageToStorage(uid, base64Data);
 
-        // Update avatar in memory and localStorage
-        if (this.authenticatedUser) {
-          this.authenticatedUser.photoURL = downloadUrl;
-          localStorage.setItem('afiacare_auth_user', JSON.stringify(this.authenticatedUser));
+          // Update avatar in memory and localStorage
+          if (this.authenticatedUser) {
+            this.authenticatedUser.photoURL = finalUrl;
+            localStorage.setItem('afiacare_auth_user', JSON.stringify(this.authenticatedUser));
+          }
+
+          // Sync to local doctor record
+          const currentDoc = this.doctors.find(d => d.id === this.selectedDoctorId);
+          if (currentDoc) {
+            currentDoc.avatar = finalUrl;
+            StorageManager.setDoctors(this.doctors);
+          }
+
+          this.updateDoctorHeaderUI();
+          this.showToast('تم رفع وتحديث الصورة بنجاح!', 'success');
+          
+          if (fileInput) fileInput.value = '';
+        } catch (err) {
+          this.showToast(`تعذر تحديث الصورة: ${err.message}`, 'error');
+        } finally {
+          if (statusIndicator) statusIndicator.classList.add('hidden');
+          if (btnUpload) {
+            btnUpload.disabled = false;
+            btnUpload.innerHTML = '<i class="fas fa-camera"></i> <span>تحديث الصورة</span>';
+          }
         }
+      };
 
-        // Sync to local doctor record
-        const currentDoc = this.doctors.find(d => d.id === this.selectedDoctorId);
-        if (currentDoc) {
-          currentDoc.avatar = downloadUrl;
-          StorageManager.setDoctors(this.doctors);
-        }
-
-        this.updateDoctorHeaderUI();
-        this.showToast('تم رفع الصورة وتحديثها بنجاح في Firebase Storage!', 'success');
-        
-        // Clear file input so it can be triggered again if needed
-        if (fileInput) fileInput.value = '';
-      } catch (err) {
-        this.showToast(`تعذر رفع الصورة: ${err.message || 'تحقق من إعدادات Firebase Storage'}`, 'error');
-      } finally {
+      reader.onerror = () => {
+        this.showToast('فشلت عملية قراءة ملف الصورة.', 'error');
         if (statusIndicator) statusIndicator.classList.add('hidden');
         if (btnUpload) {
           btnUpload.disabled = false;
-          btnUpload.innerHTML = '<i class="fas fa-cloud-arrow-up"></i> <span>رفع وتحديث الصورة (Firebase Storage)</span>';
+          btnUpload.innerHTML = '<i class="fas fa-camera"></i> <span>تحديث الصورة</span>';
         }
-      }
+      };
+
+      // Read the image file as a base64 string
+      reader.readAsDataURL(file);
     };
 
     if (btnUpload) {

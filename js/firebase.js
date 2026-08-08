@@ -83,25 +83,26 @@ export async function logOutFirebaseUser() {
 }
 
 /**
- * 2. REAL FIREBASE STORAGE - UPLOAD DOCTOR PROFILE AVATAR
+ * 2. DIRECT FIRESTORE BASE64 IMAGE UPLOAD (Bypassing Storage)
  */
-export async function uploadProfileImageToStorage(doctorId, file) {
-  if (!file) throw new Error("لم يتم اختيار أي ملف صورة للرفع.");
+export async function uploadProfileImageToStorage(doctorId, base64Image) {
+  if (!base64Image) throw new Error("لم يتم توفير بيانات الصورة.");
 
-  const fileExt = file.name.split('.').pop() || 'jpg';
-  const storageRef = ref(storage, `doctors/${doctorId}/profile_${Date.now()}.${fileExt}`);
-  
-  const snapshot = await uploadBytes(storageRef, file);
-  const downloadURL = await getDownloadURL(snapshot.ref);
-
-  // Update profile image in Firestore 'users' and 'doctors'
+  // Update profile image in Firestore 'users'
   if (auth.currentUser) {
     await setDoc(doc(db, "users", auth.currentUser.uid), {
-      photoURL: downloadURL
+      photoURL: base64Image
     }, { merge: true });
   }
 
-  return downloadURL;
+  // Update profile image in Firestore 'doctors' directly
+  if (doctorId) {
+    await setDoc(doc(db, "doctors", doctorId), {
+      avatar: base64Image
+    }, { merge: true });
+  }
+
+  return base64Image;
 }
 
 /**
